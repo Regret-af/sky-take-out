@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sky.mapper.DishMapper">
+
+    <!--新增菜品-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into dish (name, category_id, price, image, description, create_time, update_time, create_user, update_user, status)
+        VALUE
+        (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser}, #{status})
+    </insert>
+
+    <!--更新菜品信息-->
+    <update id="update">
+        update dish
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="categoryId != null and categoryId != ''">category_id = #{categoryId},</if>
+            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="image != null and image != ''">image = #{image},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="status != null and status !=''">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--批量删除菜品-->
+    <delete id="deleteBatch">
+        delete from dish where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--分页查询菜品-->
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        select dish.*, c.name category_name
+        from dish
+        left join category c on dish.category_id = c.id
+        <where>
+            <if test="name != null and name != ''">dish.name like CONCAT('%', #{name}, '%')</if>
+            <if test="categoryId != null and categoryId != ''">and dish.category_id = #{categoryId}</if>
+            <if test="status != null and status != ''">and dish.status = #{status}</if>
+        </where>
+    </select>
+</mapper>
