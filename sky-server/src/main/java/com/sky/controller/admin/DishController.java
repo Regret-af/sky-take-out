@@ -80,6 +80,11 @@ public class DishController {
         return Result.success(dish);
     }
 
+    /**
+     * 修改菜品
+     * @param dish
+     * @return
+     */
     @PutMapping
     @ApiOperation("修改菜品")
     public Result update(@RequestBody DishDTO dish) {
@@ -87,5 +92,19 @@ public class DishController {
         dishService.updateWithFlavor(dish);
 
         return Result.success();
+    }
+
+    /**
+     * 根据分类查询菜品
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result seleteByCategoryId(@RequestParam Long categoryId) {
+        log.info("开始根据分类id查询菜品：{}", categoryId);
+        List<Dish> list = dishService.getByCategoryId(categoryId);
+
+        return Result.success(list);
     }
 }
