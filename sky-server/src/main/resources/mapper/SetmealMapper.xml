@@ -12,6 +12,30 @@
             (#{categoryId}, #{name}, #{price}, #{status}, #{description}, #{image}, #{createTime}, #{updateTime},
              #{createUser}, #{updateUser})
     </insert>
+    
+    <!--修改套餐信息-->
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="categoryId != null and categoryId != ''">category_id = #{categoryId},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="image != null and image != ''">image = #{image},</if>
+        </set>
+        where id = #{id};
+    </update>
+
+    <!--批量删除套餐-->
+    <delete id="deleteBatch">
+        delete
+        from setmeal
+        where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach> ;
+    </delete>
 
     <!--分页查询套餐信息-->
     <select id="getByPage" resultType="com.sky.vo.SetmealVO">
