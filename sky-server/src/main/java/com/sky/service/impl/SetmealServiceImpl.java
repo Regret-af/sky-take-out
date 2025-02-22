@@ -10,6 +10,7 @@ import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.exception.DeletionNotAllowedException;
+import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class SetmealServiceImpl implements SetmealService {
@@ -31,6 +33,9 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private DishMapper dishMapper;
 
     /**
      * 新增套餐
@@ -110,8 +115,9 @@ public class SetmealServiceImpl implements SetmealService {
 
         // 查询套餐中包含的菜品
         List<SetmealDish> dishes = setmealDishMapper.getSetmealDishes(setmeal.getId());
+        setmealVO.setSetmealDishes(dishes);
 
-        return null;
+        return setmealVO;
     }
 
     /**
@@ -131,5 +137,34 @@ public class SetmealServiceImpl implements SetmealService {
         // 再修改套餐和菜品的关系，先全部删除，再新增
         setmealDishMapper.deleteBySetmealId(list);
         setmealDishMapper.insert(setmealDTO.getSetmealDishes());
+    }
+
+    /**
+     * 起售、停售套餐
+     * @param id
+     * @param status
+     */
+    @Override
+    public void startOrStop(Long id, Integer status) {
+        // 创建套餐对象
+        Setmeal setmeal = Setmeal.builder()
+                .id(id)
+                .status(status)
+                .build();
+
+        // 如果需要停售，不需要判断，直接停售
+        if (Objects.equals(status, StatusConstant.DISABLE)) {
+            setmealMapper.update(setmeal);
+        }
+
+        // 如果需要起售，则需要判断套餐内菜品是否均起售
+        List<Dish> dishes = dishMapper.getBySetmealId(id);
+        dishes.forEach(dish -> {
+            if (Objects.equals(dish.getStatus(), StatusConstant.DISABLE)) {
+                throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+            }
+        });
+
+        setmealMapper.update(setmeal);
     }
 }

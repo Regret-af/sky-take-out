@@ -76,7 +76,7 @@ public class SetmealController {
         log.info("开始根据id查询套餐：{}", id);
         SetmealVO setmealVO = setmealService.getById(id);
 
-        return Result.success();
+        return Result.success(setmealVO);
     }
 
     /**
@@ -89,6 +89,15 @@ public class SetmealController {
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         log.info("开始修改套餐：{}", setmealDTO);
         setmealService.update(setmealDTO);
+
+        return Result.success();
+    }
+
+    @PostMapping("/status/{status}")
+    @ApiOperation("起售停售套餐")
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("开始进行套餐状态更改：{},{}", id, status);
+        setmealService.startOrStop(id, status);
 
         return Result.success();
     }
