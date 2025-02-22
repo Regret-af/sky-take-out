@@ -26,7 +26,7 @@
 
     <!--查找包含指定菜品的套餐id-->
     <select id="getSetmealIdsByDishIds" resultType="java.lang.Long">
-        select * from setmeal_dish where id in
+        select setmeal_id from setmeal_dish where dish_id in
         <foreach collection="ids" item="id" open="(" close=")" separator=",">
             #{id}
         </foreach>
