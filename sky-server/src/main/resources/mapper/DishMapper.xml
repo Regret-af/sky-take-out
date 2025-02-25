@@ -44,4 +44,15 @@
             <if test="status != null and status != ''">and dish.status = #{status}</if>
         </where>
     </select>
+
+    <!--动态查询菜品-->
+    <select id="list" resultType="com.sky.entity.Dish">
+        select *
+        from dish
+        <where>
+            <if test="name != null and name != ''">dish.name like CONCAT('%', #{name}, '%')</if>
+            <if test="categoryId != null and categoryId != ''">and dish.category_id = #{categoryId}</if>
+            <if test="status != null and status != ''">and dish.status = #{status}</if>
+        </where>;
+    </select>
 </mapper>
