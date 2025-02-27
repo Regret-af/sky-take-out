@@ -13,10 +13,10 @@ public interface ShoppingCartMapper {
 
     /**
      * 动态查询购物车
-     * @param shoppingCartDTO
+     * @param shoppingCart
      * @return
      */
-    List<ShoppingCart> list(ShoppingCart shoppingCartDTO);
+    List<ShoppingCart> list(ShoppingCart shoppingCart);
 
     /**
      * 更新购物车数据
