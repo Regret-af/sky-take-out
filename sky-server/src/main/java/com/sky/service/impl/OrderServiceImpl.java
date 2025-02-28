@@ -84,6 +84,8 @@ public class OrderServiceImpl implements OrderService {
         orders.setPhone(addressBook.getPhone());
         orders.setAddress(addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
         orders.setConsignee(addressBook.getConsignee());
+        // 存入用户名
+        orders.setUserName(userMapper.getById(userId).getName());
 
         // 先将订单存入订单表
         orderMapper.insert(orders);
@@ -198,5 +200,27 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return new PageResult(orders.getTotal(), list);
+    }
+
+    /**
+     * 查询订单详情
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderVO getById(Integer id) {
+        OrderVO orderVO = new OrderVO();
+
+        // 查询订单信息
+        Orders orders = orderMapper.getById(id);
+
+        // 查询订单明细表
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(orders);
+
+        // 封装返回数据
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(details);
+
+        return orderVO;
     }
 }
