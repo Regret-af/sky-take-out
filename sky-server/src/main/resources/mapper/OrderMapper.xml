@@ -55,5 +55,6 @@
             <if test="userId != null">user_id = #{userId}</if>
             <if test="status != null">and status = #{status}</if>
         </where>
+        order by order_time desc
     </select>
 </mapper>
