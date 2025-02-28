@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -267,5 +268,40 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     * @return
+     */
+    @Override
+    public void repetition(Integer id) {
+        // 首先查看订单是否存在
+        Orders ordersDB = orderMapper.getById(id);
+
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 如果存在，将订单商品加入购物车
+        // 当前用户id
+        Long currentId = BaseContext.getCurrentId();
+
+        // 获取订单明细
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(ordersDB);
+
+        List<ShoppingCart> list = details.stream().map(orderDetail -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(orderDetail, shoppingCart);
+
+            shoppingCart.setUserId(currentId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        // 将购物车数据批量加入数据库
+        shoppingCartMapper.insertBatch(list);
     }
 }

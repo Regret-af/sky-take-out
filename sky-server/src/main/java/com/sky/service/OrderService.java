@@ -49,4 +49,10 @@ public interface OrderService {
      * @param id
      */
     void cancel(Integer id) throws Exception;
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    void repetition(Integer id);
 }
