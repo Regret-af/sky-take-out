@@ -18,6 +18,7 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -222,5 +223,49 @@ public class OrderServiceImpl implements OrderService {
         orderVO.setOrderDetailList(details);
 
         return orderVO;
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     * @return
+     */
+    @Override
+    public void cancel(Integer id) throws Exception {
+        // 判断订单是否存在
+        Orders ordersDB = orderMapper.getById(id);
+
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 判断订单状态
+        if (ordersDB.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders orders = Orders.builder()
+                .id(ordersDB.getId())
+                .status(Orders.CANCELLED)
+                .cancelTime(LocalDateTime.now())
+                .cancelReason("用户取消订单")
+                .build();
+
+        // 如果订单已经付款，需要进行退款操作
+        if (ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            /*
+            // 进行退款操作
+            weChatPayUtil.refund(
+                    ordersDB.getNumber(),   //商户订单号
+                    ordersDB.getNumber(),   //商户退款单号
+                    new BigDecimal(String.valueOf(ordersDB.getAmount())),   //退款金额，单位 元
+                    new BigDecimal(String.valueOf(ordersDB.getAmount())));  //原订单金额
+             */
+
+            // 更新数据信息
+            orders.setPayStatus(Orders.REFUND);
+        }
+
+        orderMapper.update(orders);
     }
 }
