@@ -18,7 +18,6 @@ import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -303,5 +302,55 @@ public class OrderServiceImpl implements OrderService {
 
         // 将购物车数据批量加入数据库
         shoppingCartMapper.insertBatch(list);
+    }
+
+    /**
+     * 管理端的订单搜索
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult ordersSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        // 设置分页查询参数
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        // 开始进行查询
+        Page<Orders> orders = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        // 开始封装数据
+        List<OrderVO> list = new ArrayList<>();
+        if (orders != null && orders.size() > 0) {
+            for (Orders order : orders) {
+                OrderVO orderVO = new OrderVO();
+                // 将共同字段复制
+                BeanUtils.copyProperties(order, orderVO);
+                // 将菜品信息封装为字符串
+                orderVO.setOrderDishes(getOrderDishesStr(order));
+
+                list.add(orderVO);
+            }
+        }
+
+        return new PageResult(orders.getTotal(), list);
+    }
+
+    /**
+     * 根据订单id获取菜品信息字符串
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders) {
+        // 查询订单菜品详情信息(菜品和数量)
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(orders);
+
+        // 将每一条信息都转化为字符串
+        List<String> orderStrList = details.stream().map(orderDetail -> {
+            String orderStr = orderDetail.getName() + "*" + orderDetail.getNumber() + ";";
+            return orderStr;
+        }).collect(Collectors.toList());
+
+        // 进行拼接
+        return String.join("", orderStrList);
     }
 }
