@@ -471,6 +471,35 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 完成订单
+     * @param id
+     */
+    @Override
+    public void complete(Long id) {
+        // 查询订单是否存在
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 若不存在，直接抛出异常
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 查看订单状态和订单支付状态
+        if (!ordersDB.getStatus().equals(Orders.DELIVERY_IN_PROGRESS) || !ordersDB.getPayStatus().equals(Orders.PAID)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        // 更新数据库中订单信息
+        Orders orders = Orders.builder()
+                .id(id)
+                .status(Orders.COMPLETED)
+                .deliveryTime(LocalDateTime.now())
+                .build();
+
+        orderMapper.update(orders);
+    }
+
+    /**
      * 根据订单id获取菜品信息字符串
      * @param orders
      * @return
