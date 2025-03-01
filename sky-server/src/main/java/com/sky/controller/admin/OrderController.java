@@ -58,7 +58,7 @@ public class OrderController {
      */
     @GetMapping("/details/{id}")
     @ApiOperation("查询订单详情")
-    public Result<OrderVO> getOrderDetail(@PathVariable Integer id) {
+    public Result<OrderVO> getOrderDetail(@PathVariable Long id) {
         log.info("管理端开始查询订单详情，订单id为：{}", id);
         OrderVO orderVO = orderService.getById(id);
 
@@ -89,6 +89,20 @@ public class OrderController {
     public Result rejection(@RequestBody OrdersRejectionDTO ordersRejectionDTO) {
         log.info("管理端进行拒单操作:{}", ordersRejectionDTO);
         orderService.rejection(ordersRejectionDTO);
+
+        return Result.success();
+    }
+
+    /**
+     * 管理端取消订单操作
+     * @param ordersCancelDTO
+     * @return
+     */
+    @PutMapping("/cancel")
+    @ApiOperation("取消订单")
+    public Result cancel(@RequestBody OrdersCancelDTO ordersCancelDTO) {
+        log.info("管理端进行拒单操作:{}", ordersCancelDTO);
+        orderService.adminCancel(ordersCancelDTO);
 
         return Result.success();
     }

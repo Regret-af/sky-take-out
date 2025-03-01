@@ -42,7 +42,7 @@ public interface OrderMapper {
      * @return
      */
     @Select("select * from orders where id = #{id};")
-    Orders getById(Integer id);
+    Orders getById(Long id);
 
     /**
      * 根据订单状态查询订单数量

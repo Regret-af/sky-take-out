@@ -208,7 +208,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public OrderVO getById(Integer id) {
+    public OrderVO getById(Long id) {
         OrderVO orderVO = new OrderVO();
 
         // 查询订单信息
@@ -230,7 +230,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public void cancel(Integer id) throws Exception {
+    public void cancel(Long id) throws Exception {
         // 判断订单是否存在
         Orders ordersDB = orderMapper.getById(id);
 
@@ -274,7 +274,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public void repetition(Integer id) {
+    public void repetition(Long id) {
         // 首先查看订单是否存在
         Orders ordersDB = orderMapper.getById(id);
 
@@ -377,8 +377,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
         // 先判断订单是否存在
-        Integer id = Math.toIntExact(ordersRejectionDTO.getId());
-        Orders ordersDB = orderMapper.getById(id);
+        Orders ordersDB = orderMapper.getById(ordersRejectionDTO.getId());
 
         if (ordersDB == null) {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
@@ -405,6 +404,45 @@ public class OrderServiceImpl implements OrderService {
                 .cancelTime(LocalDateTime.now())
                 .build();
 
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 管理端取消订单操作
+     * @param ordersCancelDTO
+     */
+    @Override
+    public void adminCancel(OrdersCancelDTO ordersCancelDTO) {
+        // 判断订单是否存在
+        Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
+
+        // 如果不存在，抛出异常
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 封装更新对象
+        Orders orders = Orders.builder()
+                .id(ordersCancelDTO.getId())
+                .status(Orders.CANCELLED)
+                .cancelTime(LocalDateTime.now())
+                .cancelReason(ordersCancelDTO.getCancelReason())
+                .build();
+
+        // 判断是否需要退款
+        if (ordersDB.getPayStatus() == Orders.PAID) {
+            orders.setPayStatus(Orders.REFUND);
+            /*
+            // 进行退款操作
+            weChatPayUtil.refund(
+                    ordersDB.getNumber(),   //商户订单号
+                    ordersDB.getNumber(),   //商户退款单号
+                    new BigDecimal(String.valueOf(ordersDB.getAmount())),   //退款金额，单位 元
+                    new BigDecimal(String.valueOf(ordersDB.getAmount())));  //原订单金额
+            */
+        }
+
+        // 更新数据库
         orderMapper.update(orders);
     }
 

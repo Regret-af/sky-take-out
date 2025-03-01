@@ -78,7 +78,7 @@ public class OrderController {
      */
     @GetMapping("/orderDetail/{id}")
     @ApiOperation("查询订单详情")
-    public Result<OrderVO> orderDetail(@PathVariable Integer id) {
+    public Result<OrderVO> orderDetail(@PathVariable Long id) {
         log.info("开始查询订单详情：{}", id);
         OrderVO orderVo = orderService.getById(id);
 
@@ -92,7 +92,7 @@ public class OrderController {
      */
     @PutMapping("/cancel/{id}")
     @ApiOperation("取消订单")
-    public Result cancel(@PathVariable Integer id) throws Exception {
+    public Result cancel(@PathVariable Long id) throws Exception {
         log.info("开始取消订单：{}", id);
         orderService.cancel(id);
 
@@ -106,7 +106,7 @@ public class OrderController {
      */
     @PostMapping("/repetition/{id}")
     @ApiOperation("再来一单")
-    public Result repetition(@PathVariable Integer id) {
+    public Result repetition(@PathVariable Long id) {
         log.info("再来一单，订单id为：{}", id);
         orderService.repetition(id);
 

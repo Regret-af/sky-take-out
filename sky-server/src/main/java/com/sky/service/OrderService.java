@@ -41,19 +41,19 @@ public interface OrderService {
      * @param id
      * @return
      */
-    OrderVO getById(Integer id);
+    OrderVO getById(Long id);
 
     /**
      * 取消订单
      * @param id
      */
-    void cancel(Integer id) throws Exception;
+    void cancel(Long id) throws Exception;
 
     /**
      * 再来一单
      * @param id
      */
-    void repetition(Integer id);
+    void repetition(Long id);
 
     /**
      * 管理端的订单搜索
@@ -81,4 +81,10 @@ public interface OrderService {
      * @param ordersRejectionDTO
      */
     void rejection(OrdersRejectionDTO ordersRejectionDTO);
+
+    /**
+     * 管理端取消订单操作
+     * @param ordersCancelDTO
+     */
+    void adminCancel(OrdersCancelDTO ordersCancelDTO);
 }
