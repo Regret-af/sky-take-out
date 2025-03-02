@@ -54,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     @Value("${sky.baidu.ak}")
     private String ak;
     @Value("${sky.shop.address}")
-    private String address;
+    private String shopAddress;
 
     /**
      * 用户下单
@@ -83,6 +83,8 @@ public class OrderServiceImpl implements OrderService {
         if (list == null || list.size() == 0) {
             throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
+
+        checkOutOfRange(addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail());
 
         // 拷贝数据
         Orders orders = new Orders();
@@ -576,7 +578,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 数据解析
         JSONObject jsonObject = JSONObject.parseObject(userCoordinate);
-        if (jsonObject.getString("status").equals("0")) {
+        if (!jsonObject.getString("status").equals("0")) {
             throw new OrderBusinessException(MessageConstant.ADDRESS_RESOLUTION_FAILED);
         }
 
@@ -584,6 +586,47 @@ public class OrderServiceImpl implements OrderService {
         JSONObject location = jsonObject.getJSONObject("result").getJSONObject("location");
         String lng = location.getString("lng"); // 经度值
         String lat = location.getString("lat"); // 纬度值
-        String userLngLat = lng + "," + lat;
+        String userLngLat = lat + "," + lng;
+
+        // 获取商家的经纬度坐标
+        map.put("address", shopAddress);
+        String adminCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3/", map);
+
+        // 数据解析
+        jsonObject = JSONObject.parseObject(adminCoordinate);
+        if (!jsonObject.getString("status").equals("0")) {
+            throw new OrderBusinessException(MessageConstant.ADDRESS_RESOLUTION_FAILED);
+        }
+
+        // 获取用户地址的经纬度
+        location = jsonObject.getJSONObject("result").getJSONObject("location");
+        lng = location.getString("lng");
+        lat = location.getString("lat");
+        String shopLngLat = lat + "," + lng;
+
+        // 添加请求参数
+        map.put("origins", shopLngLat);
+        map.put("destinations", userLngLat);
+        map.put("riding_type", "1");
+        map.remove("address");
+        map.remove("city");
+
+        // 发送请求
+        String res = HttpClientUtil.doGet("https://api.map.baidu.com/routematrix/v2/riding", map);
+
+        // 数据解析
+        JSONObject resObject = JSONObject.parseObject(res);
+        if (!resObject.getString("status").equals("0")) {
+            throw new OrderBusinessException(MessageConstant.ADDRESS_RESOLUTION_FAILED);
+        }
+
+        Integer distance = resObject.getJSONArray("result")
+                .getJSONObject(0)
+                .getJSONObject("distance")
+                .getInteger("value");
+
+        if (distance > 5000) {
+            throw new OrderBusinessException(MessageConstant.OUT_OF_DELIVERY);
+        }
     }
 }

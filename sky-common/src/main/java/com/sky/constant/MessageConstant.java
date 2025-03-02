@@ -26,5 +26,6 @@ public class MessageConstant {
     public static final String ALREADY_EXISTS = "已存在";
     public static final String ADDRESS_RESOLUTION_FAILED = "地址解析失败";
     public static final String ORDER_TIME_OUT = "订单超时";
+    public static final String OUT_OF_DELIVERY = "超出配送范围";
 
 }
