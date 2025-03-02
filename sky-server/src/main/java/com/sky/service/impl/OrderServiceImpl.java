@@ -12,20 +12,25 @@ import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.utils.HttpClientUtil;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +48,13 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
+
+    @Value("${sky.baidu.ak}")
+    private String ak;
+    @Value("${sky.shop.address}")
+    private String address;
 
     /**
      * 用户下单
@@ -165,6 +177,15 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        // 通过 WebSocket向客户端浏览器推送消息，提醒商家来单
+        Map map = new HashMap();
+        map.put("type", 1); // 1 来单提醒 2 催单提醒
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号:" + outTradeNo);
+
+        String json = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
     }
 
     /**
@@ -500,6 +521,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
+     * 用户催单
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        // 根据id查询订单号
+        Orders ordersDB = orderMapper.getById(id);
+
+        // 校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        // 通过 WebSocket向客户端浏览器发送消息，通知商家用户催单
+        Map map = new HashMap();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号:" + ordersDB.getNumber());
+        String json =   JSONObject.toJSONString(map);
+
+        webSocketServer.sendToAllClient(json);
+    }
+
+    /**
      * 根据订单id获取菜品信息字符串
      * @param orders
      * @return
@@ -518,5 +563,27 @@ public class OrderServiceImpl implements OrderService {
         return String.join("", orderStrList);
     }
 
+    // 查询是否超过配送范围
+    private void checkOutOfRange(String address) {
+        Map map = new HashMap();
+        map.put("address", address);
+        map.put("output", "json");
+        map.put("city", "北京市");
+        map.put("ak", ak);
 
+        // 获取用户的经纬度坐标
+        String userCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3/", map);
+
+        // 数据解析
+        JSONObject jsonObject = JSONObject.parseObject(userCoordinate);
+        if (jsonObject.getString("status").equals("0")) {
+            throw new OrderBusinessException(MessageConstant.ADDRESS_RESOLUTION_FAILED);
+        }
+
+        // 获取用户地址的经纬度
+        JSONObject location = jsonObject.getJSONObject("result").getJSONObject("location");
+        String lng = location.getString("lng"); // 经度值
+        String lat = location.getString("lat"); // 纬度值
+        String userLngLat = lng + "," + lat;
+    }
 }
