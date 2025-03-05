@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.DataOverViewQueryDTO;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
@@ -48,5 +49,19 @@ public class ReportController {
         UserReportVO userReportVO = reportService.userStatistics(dataOverViewQueryDTO);
 
         return Result.success(userReportVO);
+    }
+
+    /**
+     * 订单统计接口
+     * @param dataOverViewQueryDTO
+     * @return
+     */
+    @GetMapping("/ordersStatistics")
+    @ApiOperation("订单统计接口")
+    public Result<OrderReportVO> ordersStatistics(DataOverViewQueryDTO dataOverViewQueryDTO) {
+        log.info("开始进行订单统计:{}", dataOverViewQueryDTO);
+        OrderReportVO orderReportVO = reportService.orderStatistics(dataOverViewQueryDTO);
+
+        return Result.success(orderReportVO);
     }
 }

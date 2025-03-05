@@ -6,6 +6,7 @@ import com.sky.entity.Orders;
 import com.sky.exception.DateTimeException;
 import com.sky.mapper.OrderMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import org.apache.commons.lang3.StringUtils;
@@ -33,21 +34,8 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public TurnoverReportVO turnoverStatistics(DataOverViewQueryDTO dataOverViewQueryDTO) {
-        // 先判断传来的日期是否合理
-        if (dataOverViewQueryDTO.getBegin().isAfter(dataOverViewQueryDTO.getEnd())) {
-            throw new DateTimeException(MessageConstant.PARAMETER_PASSED_ERROR);
-        }
-
-        // 将日期封装为集合
-        List<LocalDate> dateList = new ArrayList<>();
-        LocalDate begin = dataOverViewQueryDTO.getBegin();
-        LocalDate end = dataOverViewQueryDTO.getEnd();
-        dateList.add(begin);
-
-        while (begin.isBefore(end)) {
-            begin = begin.plusDays(1);
-            dateList.add(begin);
-        }
+        // 先判断传来的日期是否合理，并将日期封装为集合
+        List<LocalDate> dateList = date4List(dataOverViewQueryDTO.getBegin(), dataOverViewQueryDTO.getEnd());
 
         // 再查找营业额
         List<Double> turnoverList = new ArrayList<>();
@@ -79,48 +67,25 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public UserReportVO userStatistics(DataOverViewQueryDTO dataOverViewQueryDTO) {
-        // 先判断传来的日期是否合理
-        if (dataOverViewQueryDTO.getBegin().isAfter(dataOverViewQueryDTO.getEnd())) {
-            throw new DateTimeException(MessageConstant.PARAMETER_PASSED_ERROR);
-        }
-
-        // 将日期封装为集合（添加前一天，以计算第一天新增人数）
-        List<LocalDate> dateList = new ArrayList<>();
-        LocalDate begin = dataOverViewQueryDTO.getBegin();
-        LocalDate end = dataOverViewQueryDTO.getEnd();
-        dateList.add(begin.minusDays(1));
-        dateList.add(begin);
-
-        while (begin.isBefore(end)) {
-            begin = begin.plusDays(1);
-            dateList.add(begin);
-        }
+        // 先判断传来的日期是否合理，并将日期封装为集合（添加前一天，以计算第一天新增人数）
+        List<LocalDate> dateList = date4List(dataOverViewQueryDTO.getBegin(), dataOverViewQueryDTO.getEnd());
 
         // 再查找每天用户人数
         List<Integer> userList = new ArrayList<>();
+        List<Integer> newUserList = new ArrayList<>();
+
         for (LocalDate date : dateList) {
             LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
             LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
 
-            Map map = new HashMap();
-            map.put("begin", beginTime);
-            map.put("end", endTime);
-            map.put("status", Orders.COMPLETED);
-            Integer total = orderMapper.sumUserByMap(map);
-            if (total == null) total = 0;
+            Integer user = getUserCount(null, endTime, Orders.COMPLETED);
+            Integer newUser = getUserCount(beginTime, endTime, Orders.COMPLETED);
+            if (user == null) user = 0;
+            if (newUser == null) newUser = 0;
 
-            userList.add(total);
+            userList.add(user);
+            newUserList.add(newUser);
         }
-
-        // 计算新增用户人数（需要查询前一天的用户人数以填充第一天新增人数）
-        List<Integer> newUserList = new ArrayList<>();
-        for (int i = 0; i < userList.size() - 1; i++) {
-            newUserList.add(userList.get(i + 1) - userList.get(i));
-        }
-
-        // 删除多余的日期和当天用户人数
-        dateList.remove(0);
-        userList.remove(0);
 
         return UserReportVO
                 .builder()
@@ -128,5 +93,110 @@ public class ReportServiceImpl implements ReportService {
                 .totalUserList(StringUtils.join(userList, ","))
                 .newUserList(StringUtils.join(newUserList, ","))
                 .build();
+    }
+
+    /**
+     * 订单统计接口
+     * @param dataOverViewQueryDTO
+     * @return
+     */
+    @Override
+    public OrderReportVO orderStatistics(DataOverViewQueryDTO dataOverViewQueryDTO) {
+        // 先判断传来的日期是否合理，并将日期封装为集合
+        List<LocalDate> dateList = date4List(dataOverViewQueryDTO.getBegin(), dataOverViewQueryDTO.getEnd());
+
+        List<Integer> orderList = new ArrayList<>();
+        List<Integer> validOrderList = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+
+            // 查找每天的总订单数
+            Integer orderCount = getOrderCount(beginTime, endTime, null);
+
+            // 查找每天的有效订单数
+            Integer validOrderCount = getOrderCount(beginTime, endTime, Orders.COMPLETED);
+
+            if (orderCount == null) orderCount = 0;
+            if (validOrderCount == null) validOrderCount = 0;
+
+            validOrderList.add(validOrderCount);
+            orderList.add(orderCount);
+        }
+
+        // 计算订单总数，有效订单数和完成率
+        Integer totalOrderCount = orderList.stream().reduce((a, b) -> a + b).get();
+        Integer validOrderCount = validOrderList.stream().reduce((a, b) -> a + b).get();
+        Double orderCompletionRate = 0.0;
+        if (totalOrderCount != 0) {
+            orderCompletionRate = validOrderCount.doubleValue() / totalOrderCount;
+        }
+
+        return OrderReportVO
+                .builder()
+                .dateList(StringUtils.join(dateList, ","))
+                .orderCountList(StringUtils.join(orderList, ","))
+                .validOrderCountList(StringUtils.join(validOrderList, ","))
+                .totalOrderCount(totalOrderCount)
+                .validOrderCount(validOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    /**
+     * 将日期封装为集合
+     * @param begin
+     * @param end
+     * @return
+     */
+    private List<LocalDate> date4List(LocalDate begin, LocalDate end) {
+        // 先判断传来的日期是否合理
+        if (begin.isAfter(end)) {
+            throw new DateTimeException(MessageConstant.PARAMETER_PASSED_ERROR);
+        }
+
+        // 将日期封装为集合（添加前一天，以计算第一天新增人数）
+        List<LocalDate> dateList = new ArrayList<>();
+        dateList.add(begin);
+
+        while (begin.isBefore(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+
+        return dateList;
+    }
+
+    /**
+     * 根据时间区间统计用户数量
+     * @param begin
+     * @param end
+     * @param status
+     * @return
+     */
+    private Integer getUserCount(LocalDateTime begin, LocalDateTime end, Integer status) {
+        Map map = new HashMap();
+        map.put("begin", begin);
+        map.put("end", end);
+        map.put("status", status);
+
+        return orderMapper.countByMap(map);
+    }
+
+    /**
+     * 根据时间区间统计订单数量
+     * @param begin
+     * @param end
+     * @param status
+     * @return
+     */
+    private Integer getOrderCount(LocalDateTime begin, LocalDateTime end, Integer status) {
+        Map map = new HashMap();
+        map.put("begin", begin);
+        map.put("end", end);
+        map.put("status", status);
+
+        return orderMapper.countByMap(map);
     }
 }
