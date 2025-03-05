@@ -72,4 +72,21 @@
             <if test="status != null">and status = #{status}</if>
         </where>
     </select>
+
+    <!--查询销量排名top10的商品-->
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        select od.name name, sum(od.number) number
+        from orders o, order_detail od
+        where o.id = od.order_id
+        and o.status = 5
+        <if test="beginTime != null">
+            and order_time &gt; #{beginTime}
+        </if>
+        <if test="endTime != null">
+            and order_time &lt; #{endTime}
+        </if>
+        group by od.name
+        order by number desc
+        limit 0,10
+    </select>
 </mapper>

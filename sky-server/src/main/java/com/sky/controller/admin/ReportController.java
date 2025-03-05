@@ -4,6 +4,7 @@ import com.sky.dto.DataOverViewQueryDTO;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
@@ -63,5 +64,19 @@ public class ReportController {
         OrderReportVO orderReportVO = reportService.orderStatistics(dataOverViewQueryDTO);
 
         return Result.success(orderReportVO);
+    }
+
+    /**
+     * 查询销量排名top10接口
+     * @param dataOverViewQueryDTO
+     * @return
+     */
+    @GetMapping("/top10")
+    @ApiOperation("查询销量排名top10接口")
+    public Result<SalesTop10ReportVO> top10(DataOverViewQueryDTO dataOverViewQueryDTO) {
+        log.info("开始查询销量排名top10的菜品:{}", dataOverViewQueryDTO);
+        SalesTop10ReportVO salesTop10ReportVO = reportService.getSalesTop10(dataOverViewQueryDTO);
+
+        return Result.success(salesTop10ReportVO);
     }
 }
