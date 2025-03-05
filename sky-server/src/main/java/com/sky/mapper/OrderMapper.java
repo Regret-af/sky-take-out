@@ -71,5 +71,8 @@ public interface OrderMapper {
      * @return
      */
     @Select("select sum(amount) from orders where status = #{status} and order_time > #{begin} and order_time < #{end};")
-    Double sumByMap(Map map);
+    Double sumMoneyByMap(Map map);
+
+    @Select("select count(*) from orders where status = #{status} and order_time > #{begin} and order_time < #{end};")
+    Integer sumUserByMap(Map map);
 }

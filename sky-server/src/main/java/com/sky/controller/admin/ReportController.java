@@ -4,6 +4,7 @@ import com.sky.dto.DataOverViewQueryDTO;
 import com.sky.result.Result;
 import com.sky.service.ReportService;
 import com.sky.vo.TurnoverReportVO;
+import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -33,5 +34,19 @@ public class ReportController {
         TurnoverReportVO turnoverReportVO = reportService.turnoverStatistics(dataOverViewQueryDTO);
 
         return Result.success(turnoverReportVO);
+    }
+
+    /**
+     * 用户统计接口
+     * @param dataOverViewQueryDTO
+     * @return
+     */
+    @GetMapping("/userStatistics")
+    @ApiOperation("用户统计接口")
+    public Result<UserReportVO> userStatistics(DataOverViewQueryDTO dataOverViewQueryDTO) {
+        log.info("开始进行用户数量统计:{}", dataOverViewQueryDTO);
+        UserReportVO userReportVO = reportService.userStatistics(dataOverViewQueryDTO);
+
+        return Result.success(userReportVO);
     }
 }
