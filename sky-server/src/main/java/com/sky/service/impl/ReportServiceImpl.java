@@ -6,6 +6,7 @@ import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.exception.DateTimeException;
 import com.sky.mapper.OrderMapper;
+import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
 import com.sky.vo.SalesTop10ReportVO;
@@ -29,6 +30,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 营业额统计接口
@@ -205,9 +208,8 @@ public class ReportServiceImpl implements ReportService {
         Map map = new HashMap();
         map.put("begin", begin);
         map.put("end", end);
-        map.put("status", status);
 
-        return orderMapper.countByMap(map);
+        return userMapper.countByMap(map);
     }
 
     /**
