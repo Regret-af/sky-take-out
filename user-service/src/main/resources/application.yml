@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: user-service
+  cloud:
+    nacos:
+      server-addr: 192.168.88.130:8848
   profiles:
     active: dev
   main:
