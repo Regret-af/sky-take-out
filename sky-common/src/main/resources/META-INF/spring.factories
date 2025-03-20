@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.sky.config.PropertiesConfiguration,\
+  com.sky.config.WebSocketConfiguration,\
+  com.sky.config.WebMvcConfiguration,\
+  com.sky.config.RedisConfiguration,\
+  com.sky.config.OssConfiguration
