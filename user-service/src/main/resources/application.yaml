@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    allow-circular-references: true
+
+sky:
+  datasource:
+    database: sky_take_out
+  mybatis:
+    type: com.sky.user.domain.entity
+  swagger:
+    title: 用户功能接口文档
+    package: com.sky.user.controller
+
+
