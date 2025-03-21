@@ -1,6 +1,6 @@
 package com.sky.product.domain.vo;
 
-import com.sky.entity.DishFlavor;
+import com.sky.product.domain.entity.DishFlavor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

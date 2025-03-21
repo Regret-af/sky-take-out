@@ -1,6 +1,6 @@
 package com.sky.product.domain.dto;
 
-import com.sky.entity.DishFlavor;
+import com.sky.product.domain.entity.DishFlavor;
 import lombok.Data;
 
 import java.io.Serializable;

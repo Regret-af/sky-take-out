@@ -1,6 +1,6 @@
 package com.sky.product.domain.vo;
 
-import com.sky.entity.SetmealDish;
+import com.sky.product.domain.entity.SetmealDish;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

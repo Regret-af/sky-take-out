@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    allow-circular-references: true
+  redis:
+    host: ${sky.redis.host}
+    port: ${sky.redis.port}
+    database: ${sky.redis.database}
+
+sky:
+  datasource:
+    database: sky_take_out
+  mybatis:
+    type: com.sky.product.domain.entity
+  swagger:
+    title: 商品功能接口文档
+    package: com.sky.product.controller
+
+
+
+
