@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sky.product.mapper.SetmealMapper">
+
+    <!--添加套餐-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into setmeal (category_id, name, price, status, description, image, create_time, update_time,
+                             create_user, update_user) VALUE
+            (#{categoryId}, #{name}, #{price}, #{status}, #{description}, #{image}, #{createTime}, #{updateTime},
+             #{createUser}, #{updateUser})
+    </insert>
+    
+    <!--修改套餐信息-->
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="categoryId != null and categoryId != ''">category_id = #{categoryId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="image != null and image != ''">image = #{image},</if>
+        </set>
+        where id = #{id};
+    </update>
+
+    <!--批量删除套餐-->
+    <delete id="deleteBatch">
+        delete
+        from setmeal
+        where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach> ;
+    </delete>
+
+    <!--分页查询套餐信息-->
+    <select id="getByPage" resultType="com.sky.product.domain.vo.SetmealVO">
+        select s.*, c.name category_name from setmeal s left join category c on s.category_id = c.id
+        <where>
+            <if test="name != null and name !=''">s.name like CONCAT('%', #{name}, '%')</if>
+            <if test="categoryId != null and categoryId != ''">and s.category_id = #{categoryId}</if>
+            <if test="status != null and status != ''">and s.status = #{status}</if>
+        </where>
+    </select>
+
+    <!--查询套餐-->
+    <select id="list" parameterType="Setmeal" resultType="Setmeal">
+        select * from setmeal
+        <where>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from setmeal
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+        </where>
+    </select>
+</mapper>

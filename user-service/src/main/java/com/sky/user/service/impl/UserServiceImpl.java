@@ -10,6 +10,7 @@ import com.sky.user.domain.entity.User;
 import com.sky.user.mapper.UserMapper;
 import com.sky.user.service.UserService;
 import com.sky.utils.HttpClientUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -25,11 +27,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
-    /* TODO wechat
     @Autowired
     WeChatProperties properties;
-
-     */
 
     /**
      * 微信登录
@@ -65,8 +64,8 @@ public class UserServiceImpl implements UserService {
     private String getOpenid(UserLoginDTO loginDTO) {
         // 请求微信：GET https://api.weixin.qq.com/sns/jscode2session
         Map<String, String> map = new HashMap<>();
-    // TODO wechat    map.put("appid", properties.getAppid());
-    //    map.put("secret", properties.getSecret());
+        map.put("appid", properties.getAppid());
+        map.put("secret", properties.getSecret());
         map.put("js_code", loginDTO.getCode());
         map.put("grant_type", "authorization_code");
         String json = HttpClientUtil.doGet(WX_LOGIN, map);
