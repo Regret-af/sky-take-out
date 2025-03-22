@@ -1,4 +1,4 @@
-package com.sky.product.domain.dto;
+package com.sky.trade.domain.dto;
 
 import lombok.Data;
 

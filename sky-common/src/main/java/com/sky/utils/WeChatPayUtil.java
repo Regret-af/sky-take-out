@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.sky.properties.WeChatProperties;
 import com.wechat.pay.contrib.apache.httpclient.WechatPayHttpClientBuilder;
 import com.wechat.pay.contrib.apache.httpclient.util.PemUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,7 +34,7 @@ import java.util.List;
 /**
  * 微信支付工具类
  */
-@Component
+@AllArgsConstructor
 public class WeChatPayUtil {
 
     //微信支付下单接口地址

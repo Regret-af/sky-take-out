@@ -1,4 +1,4 @@
-package com.sky.product.domain.entity;
+package com.sky.trade.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

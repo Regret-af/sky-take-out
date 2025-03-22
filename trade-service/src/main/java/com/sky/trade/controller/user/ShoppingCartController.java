@@ -1,9 +1,9 @@
-package com.sky.product.controller.user;
+package com.sky.trade.controller.user;
 
-import com.sky.product.domain.dto.ShoppingCartDTO;
-import com.sky.product.domain.entity.ShoppingCart;
-import com.sky.product.service.ShoppingCartService;
 import com.sky.result.Result;
+import com.sky.trade.domain.dto.ShoppingCartDTO;
+import com.sky.trade.domain.entity.ShoppingCart;
+import com.sky.trade.service.ShoppingCartService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;

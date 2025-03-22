@@ -3,6 +3,7 @@ package com.sky.config;
 import com.sky.properties.AliOssProperties;
 import com.sky.properties.JwtProperties;
 import com.sky.properties.WeChatProperties;
+import com.sky.utils.WeChatPayUtil;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -28,5 +29,10 @@ public class PropertiesConfiguration {
     @ConfigurationProperties(prefix = "sky.wechat")
     public WeChatProperties weChatProperties() {
         return new WeChatProperties();
+    }
+
+    @Bean
+    public WeChatPayUtil weChatPayUtil(WeChatProperties weChatProperties) {
+        return new WeChatPayUtil(weChatProperties);
     }
 }

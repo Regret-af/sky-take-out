@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.sky.product.mapper.ShoppingCartMapper">
+<mapper namespace="com.sky.trade.mapper.ShoppingCartMapper">
 
     <!--批量插入数据库-->
     <insert id="insertBatch">
@@ -16,7 +16,7 @@
     </insert>
 
     <!--动态查询-->
-    <select id="list" resultType="com.sky.product.domain.entity.ShoppingCart">
+    <select id="list" resultType="com.sky.trade.domain.entity.ShoppingCart">
         select *
         from shopping_cart
         <where>

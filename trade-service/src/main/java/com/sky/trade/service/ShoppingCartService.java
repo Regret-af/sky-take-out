@@ -1,7 +1,7 @@
-package com.sky.product.service;
+package com.sky.trade.service;
 
-import com.sky.product.domain.dto.ShoppingCartDTO;
-import com.sky.product.domain.entity.ShoppingCart;
+import com.sky.trade.domain.dto.ShoppingCartDTO;
+import com.sky.trade.domain.entity.ShoppingCart;
 
 import java.util.List;
 

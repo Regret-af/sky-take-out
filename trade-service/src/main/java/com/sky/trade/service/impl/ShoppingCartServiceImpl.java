@@ -1,14 +1,10 @@
-package com.sky.product.service.impl;
+package com.sky.trade.service.impl;
 
 import com.sky.context.BaseContext;
-import com.sky.product.domain.dto.ShoppingCartDTO;
-import com.sky.product.domain.entity.Dish;
-import com.sky.product.domain.entity.Setmeal;
-import com.sky.product.domain.entity.ShoppingCart;
-import com.sky.product.mapper.DishMapper;
-import com.sky.product.mapper.SetmealMapper;
-import com.sky.product.mapper.ShoppingCartMapper;
-import com.sky.product.service.ShoppingCartService;
+import com.sky.trade.domain.dto.ShoppingCartDTO;
+import com.sky.trade.domain.entity.ShoppingCart;
+import com.sky.trade.mapper.ShoppingCartMapper;
+import com.sky.trade.service.ShoppingCartService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,11 +18,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;
 
+    /* TODO 调用商品服务功能
     @Autowired
     private DishMapper dishMapper;
 
     @Autowired
     private SetmealMapper setmealMapper;
+
+     */
 
     /**
      * 添加购物车
@@ -54,6 +53,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
             // 判断本次添加的是菜品还是套餐
             Long dishId = shoppingCartDTO.getDishId();
+/* TODO 调用别的服务
 
             if (dishId != null) {
                 // 本次添加的是菜品
@@ -73,6 +73,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 shoppingCart.setImage(setmeal.getImage());  // 填入图片路径
             }
 
+*/
             shoppingCart.setCreateTime(LocalDateTime.now());
 
             // 插入数据库
